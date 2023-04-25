@@ -1,0 +1,113 @@
+{
+    "log": {
+      "disabled": true,
+      "level": "info",
+      "timestamp": true
+    },
+    "dns": {
+      "servers": [
+        {
+          "tag": "remote-dns",
+          "address": "1.0.0.1",
+          "strategy": "ipv4_only",
+          "detour": "Proxy"
+        },
+        {
+          "tag": "dns-block",
+          "address": "rcode://success"
+        }
+      ],
+      "rules": [
+        {
+          "domain_suffix": [
+            ".arpa.",
+            ".arpa"
+          ],
+          "server": "dns-block"
+        }
+      ],
+      "final": "remote-dns",
+      "strategy": "ipv4_only",
+      "disable_cache": false,
+      "disable_expire": false
+    },
+    "inbounds": [
+        {
+          "type": "tun",
+          "tag": "tun-in",
+          "interface_name": "tun0",
+          "inet4_address": "172.19.0.1/30",
+          "inet6_address": "fdfe:dcba:9876::1/126",
+          "mtu": 30000,
+          "auto_route": true,
+          "strict_route": true,
+          "stack": "gvisor",
+          "endpoint_independent_nat": true,
+          "domain_strategy":"ipv4_only",
+          "sniff": true
+        },
+      {
+        "listen": "0.0.0.0",
+        "listen_port": 2080,
+        "sniff": true,
+        "tag": "mixed-in",
+        "type": "mixed"
+      }
+    ],
+    "outbounds": [
+      {
+        "type": "vmess",
+        "tag": "Proxy",
+        "server": "s",
+        "server_port": 443,
+        "uuid": "3",
+        "security": "auto",
+        "tls": {
+          "enabled": true,
+          "server_name": "s",
+          "insecure": true,
+          "disable_sni": false
+        },
+        "transport": {
+          "type": "ws",
+          "path": "/buy",
+          "headers": {
+            "Host": "s"
+          }
+        }
+      },
+      {
+        "type": "direct",
+        "tag": "direct"
+      },
+      {
+        "type": "block",
+        "tag": "block"
+      },
+      {
+        "type": "dns",
+        "tag": "dns-out"
+      }
+    ],
+    "route": {
+      "auto_detect_interface": true,
+      "override_android_vpn": true,
+      "final": "Proxy",
+      "geoip": {
+        "download_url": "https://github.com/malikshi/sing-box-geo/releases/latest/download/geoip.db",
+        "download_detour": "Proxy"
+      },
+      "geosite": {
+        "download_url": "https://github.com/malikshi/sing-box-geo/releases/latest/download/geosite.db",
+        "download_detour": "Proxy"
+      },
+      "rules": [
+        {
+          "outbound": "dns-out",
+          "port": [
+            53
+          ]
+        }
+      ]
+    }
+  }
