@@ -4,22 +4,19 @@ addEventListener("fetch", event => {
   })
   async function handleRequest(request) {
     if (request.method === "POST") {
-      const payload = await request.json() 
-      // Getting the POST request JSON payload
-      if ('message' in payload) { 
-        // Checking if the payload comes from Telegram
-        const chatId = payload.message.chat.id
-        let text = payload.message.text
-        let parse = 'markdown'
-        const api_Key = '6266931631:AAHd1TMF9SqKKmmetTKfq5tXjqoNE1SjD1s'
-        // let output = text + "hello"
-		const urlparse = encodeURIComponent(text);
-		const link = `https://sub.bonds.id/sub2?target=clash&url=${urlparse}&insert=false&config=base%2Fdatabase%2Fconfig%2Fstandard%2Fstandard_redir.ini&emoji=false&list=true&udp=true&tfo=false&expand=false&scv=true&fdn=false&sort=false&new_name=true`;
+      const payload = await request.json()
+      if ('message' in payload) {
+        const chatId = payload.message.chat.id;
+        let text = payload.message.text;
+        let parse = 'markdown';
+        const api_Key = '6266931631:AAHd1TMF9SqKKmmetTKfq5tXjqoNE1SjD1s';
+	const urlparse = encodeURIComponent(text);
+	const link = `https://sub.bonds.id/sub2?target=clash&url=${urlparse}&insert=false&config=base%2Fdatabase%2Fconfig%2Fstandard%2Fstandard_redir.ini&emoji=false&list=true&udp=true&tfo=false&expand=false&scv=true&fdn=false&sort=false&new_name=true`;
 		try {
 			const response = await fetch(link);
 			const data = await response.text();
 			const config = yaml.load(data);
-			console.log(data);
+			// console.log(data);
 			const {
 			  name,
 			  type,
@@ -89,10 +86,7 @@ addEventListener("fetch", event => {
 		  } catch (error) {
 			console.log('Error: ' + error.message);
 		  }
-		// const uerel = `https://api.telegram.org/bot${api_Key}/sendMessage?chat_id=${chatId}&text=${output}&parse_mode=${parse}`
-        // const daita = await fetch(uerel).then(resp => resp.json()) 
-        // Calling the API endpoint to send a telegram message
       }
     }
-    return new Response("OK") // Doesn't really matter
+    return new Response("OK")
   }
