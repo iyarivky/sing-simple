@@ -16,28 +16,38 @@ async function getData() {
       server,
       uuid,
       port,
-      chiper,
+      cipher,
       tls,
       servername,
       'skip-cert-verify': skipCertVerify,
+      network,
       'ws-opts': {
         path,
         headers: { Host },
       },
+      /*'grpc-opts':{
+        'grpc-service-name': grpcServiceName
+      }*/
     } = config.proxies[0];
     const configSing = await fetch('https://raw.githubusercontent.com/iyarivky/sing-simple/main/config/vmesstest.json');
     const dataSing = await configSing.json();
     console.log(dataSing);
-    dataSing.outbounds[0].type = type
-    dataSing.outbounds[0].server = server
-    dataSing.outbounds[0].server_port = parseInt(port,10)
-    dataSing.outbounds[0].uuid = uuid
-    dataSing.outbounds[0].security = chiper
-    dataSing.outbounds[0].tls.enabled = tls
-    dataSing.outbounds[0].tls.server_name = servername
-    dataSing.outbounds[0].tls.insecure = skipCertVerify
-    dataSing.outbounds[0].transport.path = path
-    dataSing.outbounds[0].transport.headers.Host = Host
+    dataSing.outbounds[0].type = type;
+    dataSing.outbounds[0].server = server;
+    dataSing.outbounds[0].server_port = parseInt(port, 10);
+    dataSing.outbounds[0].uuid = uuid;
+    dataSing.outbounds[0].security = cipher;
+    
+    if (tls) {
+      dataSing.outbounds[0].tls.enabled = tls;
+      dataSing.outbounds[0].tls.server_name = servername;
+      dataSing.outbounds[0].tls.insecure = skipCertVerify;
+    } else {
+      delete dataSing.outbounds[0].tls;
+    }
+    dataSing.outbounds[0].transport.type = network;
+    dataSing.outbounds[0].transport.path = path;
+    dataSing.outbounds[0].transport.headers.Host = Host;
     let formatted_json = JSON.stringify(dataSing, null, 2);
     console.log('```json\n' + formatted_json + '\n```\n');
 
