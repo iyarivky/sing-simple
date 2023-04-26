@@ -70,7 +70,7 @@
         },
         "transport": {
           "type": "grpc",
-          "service_name": "amarica",
+          "service_name": "amarica"
         }
       },
       {
