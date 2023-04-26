@@ -9,7 +9,7 @@ async function getData() {
     const response = await fetch(link);
     const data = await response.text();
     const config = yaml.load(data);
-    console.log(data);
+    // console.log(data);
     const {
       name,
       type,
