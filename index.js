@@ -21,34 +21,56 @@ async function getData() {
       servername,
       'skip-cert-verify': skipCertVerify,
       network,
-      'ws-opts': {
-        path,
-        headers: { Host },
-      },
-      /*'grpc-opts':{
-        'grpc-service-name': grpcServiceName
-      }*/
     } = config.proxies[0];
-    const configSing = await fetch('https://raw.githubusercontent.com/iyarivky/sing-simple/main/config/vmesstest.json');
-    const dataSing = await configSing.json();
-    console.log(dataSing);
-    dataSing.outbounds[0].type = type;
-    dataSing.outbounds[0].server = server;
-    dataSing.outbounds[0].server_port = parseInt(port, 10);
-    dataSing.outbounds[0].uuid = uuid;
-    dataSing.outbounds[0].security = cipher;
+    
+    let path, Host;
+    if (config.proxies[0]['ws-opts']) {
+      path = config.proxies[0]['ws-opts'].path;
+      Host = config.proxies[0]['ws-opts'].headers.Host;
+    }
+    
+    let grpcServiceName;
+    if (network === 'grpc' && config.proxies[0]['grpc-opts']) {
+      grpcServiceName = config.proxies[0]['grpc-opts']['grpc-service-name'];
+    }
+    
+    let configSing;
+    if (network === 'grpc') {
+      const configSingResponse = await fetch('https://raw.githubusercontent.com/iyarivky/sing-simple/main/config/vmessgrpc.json');
+      configSing = await configSingResponse.json();
+    } else {
+      const configSingResponse = await fetch('https://raw.githubusercontent.com/iyarivky/sing-simple/main/config/vmesstest.json');
+      configSing = await configSingResponse.json();
+    }
+    
+    console.log(configSing);
+    configSing.outbounds[0].type = type;
+    configSing.outbounds[0].server = server;
+    configSing.outbounds[0].server_port = parseInt(port, 10);
+    configSing.outbounds[0].uuid = uuid;
+    configSing.outbounds[0].security = cipher;
     
     if (tls) {
-      dataSing.outbounds[0].tls.enabled = tls;
-      dataSing.outbounds[0].tls.server_name = servername;
-      dataSing.outbounds[0].tls.insecure = skipCertVerify;
+      configSing.outbounds[0].tls.enabled = tls;
+      configSing.outbounds[0].tls.server_name = servername;
+      configSing.outbounds[0].tls.insecure = skipCertVerify;
     } else {
-      delete dataSing.outbounds[0].tls;
+      delete configSing.outbounds[0].tls;
     }
-    dataSing.outbounds[0].transport.type = network;
-    dataSing.outbounds[0].transport.path = path;
-    dataSing.outbounds[0].transport.headers.Host = Host;
-    let formatted_json = JSON.stringify(dataSing, null, 2);
+    
+    if (network === 'grpc') {
+      configSing.outbounds[0].transport.service_name = grpcServiceName;
+    } else {
+      configSing.outbounds[0].transport.type = network;
+      
+      if (path) {
+        configSing.outbounds[0].transport.path = path;
+        configSing.outbounds[0].transport.headers.Host = Host;
+      }
+      
+    }
+    
+    let formatted_json = JSON.stringify(configSing, null, 2);
     console.log('```json\n' + formatted_json + '\n```\n');
 
   } catch (error) {
