@@ -9,7 +9,7 @@ addEventListener("fetch", event => {
         const chatId = payload.message.chat.id;
         let text = payload.message.text;
         let parse = 'markdown';
-        const api_Key = '6266931631:AAHd1TMF9SqKKmmetTKfq5tXjqoNE1SjD1s';
+        const api_Key = API_KEY;
 	const urlparse = encodeURIComponent(text);
 	const link = `https://sub.bonds.id/sub2?target=clash&url=${urlparse}&insert=false&config=base%2Fdatabase%2Fconfig%2Fstandard%2Fstandard_redir.ini&emoji=false&list=true&udp=true&tfo=false&expand=false&scv=true&fdn=false&sort=false&new_name=true`;
 		try {
