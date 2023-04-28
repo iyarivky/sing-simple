@@ -1,4 +1,6 @@
 # sing-simple
 Simple v2ray url to sing-box json converter bot using Cloudflare Workers
 
-coming-soon
+- Vmess (WS,gRPC)
+- Vless (WS,gRPC)
+- Trojan (WS,gRPC)
