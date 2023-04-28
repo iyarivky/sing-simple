@@ -50,7 +50,7 @@ addEventListener("fetch", event => {
 			  configSing = await configSingResponse.json();
 			}
 			
-			console.log(configSing);
+			// console.log(configSing);
 			configSing.outbounds[0].type = type;
 			configSing.outbounds[0].server = server;
 			configSing.outbounds[0].server_port = parseInt(port, 10);
