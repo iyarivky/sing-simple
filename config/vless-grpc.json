@@ -61,7 +61,8 @@
         "server": "server domain or server ip address",
         "server_port": 443,
         "uuid": "blabla-123",
-        "security": "auto",
+        "flow": "",
+        "packet_encoding": "xudp",
         "tls": {
           "enabled": true,
           "server_name": "server domain",
