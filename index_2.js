@@ -36,7 +36,7 @@ async function getData() {
       if (type === 'vmess') {
         ({ uuid, alterId, cipher, tls, servername } = proxy);
       } else if (type === 'vless') {
-        ({ uuid, cipher, tls, servername } = proxy);
+        ({ uuid, tls, servername } = proxy);
       } else if (type === 'trojan') {
         ({ password, sni } = proxy);
       }
@@ -91,10 +91,10 @@ async function getData() {
       configSing.outbounds[0].server = server;
       configSing.outbounds[0].server_port = parseInt(port, 10);
       configSing.outbounds[0].uuid = uuid;
-      configSing.outbounds[0].security = cipher;
     
       if (type === 'vmess') {
         configSing.outbounds[0].alter_id = alterId;
+        configSing.outbounds[0].security = cipher;
       }
     
       if (network === 'ws') {
