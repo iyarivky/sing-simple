@@ -92,7 +92,7 @@ async function getData() {
       configSing.outbounds[0].uuid = uuid;
     
       if (type === 'vmess') {
-        configSing.outbounds[0].alter_id = alterId;
+        configSing.outbounds[0].alter_id = parseInt(alterId, 10);
         configSing.outbounds[0].security = cipher;
       }
     
@@ -119,6 +119,8 @@ async function getData() {
       configSing.outbounds[0].server = server;
       configSing.outbounds[0].server_port = parseInt(port, 10);
       configSing.outbounds[0].password = password;
+      configSing.outbounds[0].tls.server_name = sni;
+      configSing.outbounds[0].tls.insecure = skipCertVerify;
     
       if (network === 'ws') {
         configSing.outbounds[0].transport.path = path;
