@@ -57,8 +57,7 @@ async function getData() {
       trojan: {
         ws: 'https://raw.githubusercontent.com/iyarivky/sing-simple/main/config/trojan-ws.json',
         grpc: 'https://raw.githubusercontent.com/iyarivky/sing-simple/main/config/trojan-grpc.json',
-        gfw:
-          'https://raw.githubusercontent.com/iyarivky/sing-simple/main/config/trojan-gfw.json',
+        gfw: 'https://raw.githubusercontent.com/iyarivky/sing-simple/main/config/trojan-gfw.json',
       },
       vmess: {
         ws: 'https://raw.githubusercontent.com/iyarivky/sing-simple/main/config/vmess-ws.json',
