@@ -7,4 +7,4 @@ Simple v2ray url to sing-box json converter bot for SFA (sing-box for Android)
 
 ❌ Multi Account
 
-t.me/simplesing_bot
+https://t.me/simplesing_bot
