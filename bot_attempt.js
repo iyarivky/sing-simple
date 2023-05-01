@@ -10,71 +10,146 @@ async function handleRequest(request) {
             let text = payload.message.text;
             let parse = 'markdown';
             const api_Key = API_KEY;
+            // converter code begin
             const urlparse = encodeURIComponent(text);
             const link = `https://sub.bonds.id/sub2?target=clash&url=${urlparse}&insert=false&config=base%2Fdatabase%2Fconfig%2Fstandard%2Fstandard_redir.ini&emoji=false&list=true&udp=true&tfo=false&expand=false&scv=true&fdn=false&sort=false&new_name=true`;
             try {
                 const response = await fetch(link);
                 const data = await response.text();
                 const config = yaml.load(data);
-                // console.log(data);
+                console.log(data);
                 const {
                     name,
-                    type,
                     server,
-                    uuid,
                     port,
+                    type,
+                    'skip-cert-verify': skipCertVerify,
+                } = config.proxies[0];
+
+                let uuid,
+                    alterId,
                     cipher,
                     tls,
                     servername,
-                    'skip-cert-verify': skipCertVerify,
                     network,
-                } = config.proxies[0];
+                    path,
+                    Host,
+                    grpcServiceName,
+                    password,
+                    sni;
 
-                let path, Host;
-                if (config.proxies[0]['ws-opts']) {
-                    path = config.proxies[0]['ws-opts'].path;
-                    Host = config.proxies[0]['ws-opts'].headers.Host;
+                if (['vmess', 'vless', 'trojan'].includes(type)) {
+                    const proxy = config.proxies[0];
+
+                    if (type === 'vmess') {
+                        ({
+                            uuid,
+                            alterId,
+                            cipher,
+                            tls,
+                            servername
+                        } = proxy);
+                    } else if (type === 'vless') {
+                        ({
+                            uuid,
+                            tls,
+                            servername
+                        } = proxy);
+                    } else if (type === 'trojan') {
+                        ({
+                            password,
+                            sni
+                        } = proxy);
+                    }
+
+                    if (proxy.network) {
+                        network = proxy.network;
+
+                        if (network === 'ws') {
+                            path = proxy['ws-opts'].path;
+                            Host = proxy['ws-opts'].headers.Host;
+                        } else if (network === 'grpc') {
+                            grpcServiceName = proxy['grpc-opts']['grpc-service-name'];
+                        }
+                    }
                 }
 
-                let grpcServiceName;
-                if (network === 'grpc' && config.proxies[0]['grpc-opts']) {
-                    grpcServiceName = config.proxies[0]['grpc-opts']['grpc-service-name'];
-                }
+                const configUrls = {
+                    trojan: {
+                        ws: 'https://raw.githubusercontent.com/iyarivky/sing-simple/main/config/trojan-ws.json',
+                        grpc: 'https://raw.githubusercontent.com/iyarivky/sing-simple/main/config/trojan-grpc.json',
+                        gfw: 'https://raw.githubusercontent.com/iyarivky/sing-simple/main/config/trojan-gfw.json',
+                    },
+                    vmess: {
+                        ws: 'https://raw.githubusercontent.com/iyarivky/sing-simple/main/config/vmess-ws.json',
+                        grpc: 'https://raw.githubusercontent.com/iyarivky/sing-simple/main/config/vmess-grpc.json',
+                    },
+                    vless: {
+                        ws: 'https://raw.githubusercontent.com/iyarivky/sing-simple/main/config/vless-ws.json',
+                        grpc: 'https://raw.githubusercontent.com/iyarivky/sing-simple/main/config/vless-grpc.json',
+                    },
+                };
 
                 let configSing;
-                if (network === 'grpc') {
-                    const configSingResponse = await fetch('https://raw.githubusercontent.com/iyarivky/sing-simple/main/config/vmessgrpc.json');
-                    configSing = await configSingResponse.json();
-                } else {
-                    const configSingResponse = await fetch('https://raw.githubusercontent.com/iyarivky/sing-simple/main/config/vmesstest.json');
-                    configSing = await configSingResponse.json();
+                if (type in configUrls) {
+                    const url =
+                        network in configUrls[type] ?
+                        configUrls[type][network] :
+                        type === 'trojan' ?
+                        configUrls[type].gfw :
+                        undefined;
+                    if (url) {
+                        const configSingResponse = await fetch(url);
+                        configSing = await configSingResponse.json();
+                    }
                 }
 
-                // console.log(configSing);
-                configSing.outbounds[0].type = type;
-                configSing.outbounds[0].server = server;
-                configSing.outbounds[0].server_port = parseInt(port, 10);
-                configSing.outbounds[0].uuid = uuid;
-                configSing.outbounds[0].security = cipher;
+                console.log(configSing);
 
-                if (tls) {
-                    configSing.outbounds[0].tls.enabled = tls;
-                    configSing.outbounds[0].tls.server_name = servername;
-                    configSing.outbounds[0].tls.insecure = skipCertVerify;
-                } else {
-                    delete configSing.outbounds[0].tls;
-                }
+                if (type === 'vmess' || type === 'vless') {
+                    configSing.outbounds[0].type = type;
+                    configSing.outbounds[0].server = server;
+                    configSing.outbounds[0].server_port = parseInt(port, 10);
+                    configSing.outbounds[0].uuid = uuid;
 
-                if (network === 'grpc') {
-                    configSing.outbounds[0].transport.service_name = grpcServiceName;
-                } else {
-                    configSing.outbounds[0].transport.type = network;
+                    if (type === 'vmess') {
+                        configSing.outbounds[0].alter_id = parseInt(alterId, 10);
+                        configSing.outbounds[0].security = cipher;
+                    }
 
-                    if (path) {
+                    if (network === 'ws') {
                         configSing.outbounds[0].transport.path = path;
                         configSing.outbounds[0].transport.headers.Host = Host;
                     }
 
+                    if (network === 'grpc') {
+                        configSing.outbounds[0].transport.service_name = grpcServiceName;
+                    }
+
+                    if (tls) {
+                        configSing.outbounds[0].tls.enabled = tls;
+                        configSing.outbounds[0].tls.server_name = servername;
+                        configSing.outbounds[0].tls.insecure = skipCertVerify;
+                    } else {
+                        delete configSing.outbounds[0].tls;
+                    }
+                }
+
+                if (type === 'trojan') {
+                    configSing.outbounds[0].type = type;
+                    configSing.outbounds[0].server = server;
+                    configSing.outbounds[0].server_port = parseInt(port, 10);
+                    configSing.outbounds[0].password = password;
+                    configSing.outbounds[0].tls.server_name = sni;
+                    configSing.outbounds[0].tls.insecure = skipCertVerify;
+
+                    if (network === 'ws') {
+                        configSing.outbounds[0].transport.path = path;
+                        configSing.outbounds[0].transport.headers.Host = Host;
+                    }
+                    if (network === 'grpc') {
+                        configSing.outbounds[0].transport.service_name = grpcServiceName;
+                    }
                 }
 
                 let formatted_json = JSON.stringify(configSing, null, 2);
