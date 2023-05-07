@@ -17,7 +17,7 @@ async function handleRequest(request) {
                 const response = await fetch(link);
                 const data = await response.text();
                 const config = yaml.load(data);
-                console.log(data);
+                // console.log(data);
                 const {
                     name,
                     server,
@@ -104,7 +104,7 @@ async function handleRequest(request) {
                     }
                 }
 
-                console.log(configSing);
+                // console.log(configSing);
 
                 if (type === 'vmess' || type === 'vless') {
                     configSing.outbounds[0].type = type;
